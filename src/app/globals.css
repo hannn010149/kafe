@@ -1,26 +1,78 @@
 @import "tailwindcss";
 
+@theme {
+  --color-cream: #FAF7F2;
+  --color-cream-50: #FFFDF9;
+  --color-cream-100: #FAF7F2;
+  --color-cream-200: #F3ECE0;
+  --color-cream-300: #E8DDCB;
+  --color-beige: #E2D7C3;
+  --color-beige-dark: #CFC2A8;
+  
+  --color-sage: #536B54;
+  --color-sage-50: #F1F5F1;
+  --color-sage-100: #E2ECE2;
+  --color-sage-200: #C5D8C6;
+  --color-sage-500: #536B54;
+  --color-sage-600: #425543;
+  --color-sage-700: #334234;
+  --color-sage-800: #242E24;
+  
+  --color-charcoal: #232724;
+  --color-charcoal-50: #F5F6F5;
+  --color-charcoal-100: #E6E8E6;
+  --color-charcoal-400: #7E8680;
+  --color-charcoal-600: #4B524D;
+  --color-charcoal-800: #232724;
+  --color-charcoal-900: #171A18;
+
+  --color-matcha: #7E9765;
+  --color-matcha-soft: #EFF4EB;
+  --color-terracotta: #C57B57;
+  --color-wood: #8B6B4E;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --background: #FAF7F2;
+  --foreground: #232724;
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Minimalist Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #FAF7F2;
+}
+::-webkit-scrollbar-thumb {
+  background: #C5D8C6;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #536B54;
+}
+
+/* Print styling for receipts & reports */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
 }

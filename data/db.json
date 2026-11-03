@@ -1,0 +1,862 @@
+{
+  "cafe_settings": {
+    "id": "settings-default",
+    "name": "Komorebi Café & Roastery",
+    "kanji_name": "木漏れ日 喫茶",
+    "tagline": "Artisanal Coffee & Japanese Wabi-Sabi Tea House",
+    "description": "Sebuah ruang tenang di tengah hiruk pikuk kota, menyajikan racikan matcha murni dari Uji Kyoto, artisan coffee pilihan, dan kudapan khas dengan filosofi ketenangan Wabi-Sabi.",
+    "logo_url": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=300&q=80",
+    "banner_url": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1600&q=80",
+    "address": "Jl. Senopati No. 88, Kebayoran Baru, Jakarta Selatan 12190",
+    "whatsapp": "6281234567890",
+    "phone": "+62 21 5566 7788",
+    "email": "hello@komorebicafe.id",
+    "instagram": "@komorebi.cafe",
+    "tiktok": "@komorebi_cafe",
+    "maps_url": "https://maps.google.com/?q=Jakarta",
+    "opening_hours": {
+      "weekdays": "08:00 - 22:00",
+      "weekends": "07:00 - 23:00"
+    },
+    "primary_color": "#536B54",
+    "currency_symbol": "Rp",
+    "tax_percentage": 10,
+    "service_percentage": 5
+  },
+  "categories": [
+    {
+      "id": "cat-matcha",
+      "name": "Matcha & Hojicha",
+      "name_en": "Matcha & Hojicha",
+      "slug": "matcha-hojicha",
+      "description": "Matcha ceremonial grade murni asal perkebunan Uji, Kyoto.",
+      "description_en": "Pure ceremonial grade matcha from Uji, Kyoto.",
+      "sort_order": 1,
+      "is_active": true
+    },
+    {
+      "id": "cat-coffee",
+      "name": "Artisan Coffee",
+      "name_en": "Artisan Coffee",
+      "slug": "artisan-coffee",
+      "description": "Biji kopi single-origin pilihan disangrai secara cermat.",
+      "description_en": "Specialty single-origin beans roasted with precision.",
+      "sort_order": 2,
+      "is_active": true
+    },
+    {
+      "id": "cat-dessert",
+      "name": "Japanese Desserts",
+      "name_en": "Japanese Desserts",
+      "slug": "japanese-desserts",
+      "description": "Kue lembut, dorayaki, souffle pancake, dan crepe otentik.",
+      "description_en": "Fluffy souffle pancakes, dorayaki, and crepe delicacies.",
+      "sort_order": 3,
+      "is_active": true
+    },
+    {
+      "id": "cat-sando",
+      "name": "Mains & Sandos",
+      "name_en": "Mains & Sandos",
+      "slug": "mains-sandos",
+      "description": "Roti lapis Jepang khas shokupan dan hidangan hangat.",
+      "description_en": "Japanese milk bread sandos and warm hearty mains.",
+      "sort_order": 4,
+      "is_active": true
+    },
+    {
+      "id": "cat-tea",
+      "name": "Artisanal Tea",
+      "name_en": "Artisanal Tea",
+      "slug": "artisanal-tea",
+      "description": "Seduhan teh hijau Sencha, Genmaicha, dan herbal bunga.",
+      "description_en": "Traditional brewed Sencha, toasted Genmaicha, and herbal blends.",
+      "sort_order": 5,
+      "is_active": true
+    },
+    {
+      "id": "cat-refresh",
+      "name": "Mocktails & Refreshers",
+      "name_en": "Mocktails & Refreshers",
+      "slug": "mocktails-refreshers",
+      "description": "Minuman dingin segar dengan sentuhan buah Yuzu dan bunga.",
+      "description_en": "Sparkling refreshing mocktails infused with citrus and botanicals.",
+      "sort_order": 6,
+      "is_active": true
+    }
+  ],
+  "products": [
+    {
+      "id": "prod-matcha-latte",
+      "category_id": "cat-matcha",
+      "name": "Iced Uji Matcha Latte",
+      "name_en": "Iced Uji Matcha Latte",
+      "slug": "iced-uji-matcha-latte",
+      "description": "Matcha ceremonial grade asli Uji Kyoto dikocok tradisional dengan chasen dan dipadukan susu segar lembut.",
+      "description_en": "Authentic ceremonial Uji matcha whisked with traditional chasen and silky fresh milk.",
+      "price": 38000,
+      "image_url": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=800&q=80",
+      "is_available": true,
+      "is_featured": true,
+      "is_popular": true,
+      "is_new": false,
+      "stock": 85,
+      "calories": 140,
+      "tags": [
+        "Signature",
+        "Kyoto Uji",
+        "Best Seller"
+      ],
+      "variants": {
+        "size": [
+          {
+            "name": "Regular",
+            "extra_price": 0
+          },
+          {
+            "name": "Large",
+            "extra_price": 5000
+          }
+        ],
+        "sweetness": [
+          "Normal (100%)",
+          "Less Sweet (50%)",
+          "No Sugar (0%)"
+        ],
+        "ice": [
+          "Normal Ice",
+          "Less Ice",
+          "No Ice"
+        ],
+        "milk_options": [
+          {
+            "name": "Fresh Milk",
+            "extra_price": 0
+          },
+          {
+            "name": "Oat Milk (Oatside)",
+            "extra_price": 8000
+          },
+          {
+            "name": "Soy Milk",
+            "extra_price": 6000
+          }
+        ]
+      }
+    },
+    {
+      "id": "prod-matcha-espresso",
+      "category_id": "cat-matcha",
+      "name": "Matcha Espresso Fusion",
+      "name_en": "Matcha Espresso Fusion",
+      "slug": "matcha-espresso-fusion",
+      "description": "Perpaduan harmonis tiga lapis: matcha pekat Kyoto, susu segar, dan double shot espresso arabika.",
+      "description_en": "A mesmerizing 3-layer harmony of rich Kyoto matcha, cold fresh milk, and a bold espresso shot.",
+      "price": 42000,
+      "image_url": "https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=800&q=80",
+      "is_available": true,
+      "is_featured": true,
+      "is_popular": true,
+      "is_new": false,
+      "stock": 60,
+      "calories": 175,
+      "tags": [
+        "Signature",
+        "Caffeine Fusion"
+      ],
+      "variants": {
+        "size": [
+          {
+            "name": "Regular",
+            "extra_price": 0
+          },
+          {
+            "name": "Large",
+            "extra_price": 5000
+          }
+        ],
+        "sweetness": [
+          "Normal",
+          "Less Sweet",
+          "No Sugar"
+        ],
+        "ice": [
+          "Normal Ice",
+          "Less Ice"
+        ],
+        "milk_options": [
+          {
+            "name": "Fresh Milk",
+            "extra_price": 0
+          },
+          {
+            "name": "Oat Milk",
+            "extra_price": 8000
+          }
+        ]
+      }
+    },
+    {
+      "id": "prod-hojicha-latte",
+      "category_id": "cat-matcha",
+      "name": "Roasted Hojicha Latte",
+      "name_en": "Roasted Hojicha Latte",
+      "slug": "roasted-hojicha-latte",
+      "description": "Teh hijau panggang dengan aroma nutty dan smokey yang menenangkan, dipadukan susu karamel lembut.",
+      "description_en": "Slow-roasted green tea offering a warm nutty, smoky aroma blended with gentle steamed milk.",
+      "price": 36000,
+      "image_url": "https://images.unsplash.com/photo-1577968897966-3d4325b36b61?auto=format&fit=crop&w=800&q=80",
+      "is_available": true,
+      "is_featured": false,
+      "is_popular": true,
+      "is_new": false,
+      "stock": 70,
+      "calories": 130,
+      "tags": [
+        "Low Caffeine",
+        "Comfort"
+      ]
+    },
+    {
+      "id": "prod-tokyo-drip",
+      "category_id": "cat-coffee",
+      "name": "Tokyo Hand Drip Coffee",
+      "name_en": "Tokyo Hand Drip Coffee",
+      "slug": "tokyo-hand-drip-coffee",
+      "description": "Kopi pour-over manual brew gaya kissa Jepang dengan filter kalita wave, rasa bersih bernada melati dan jeruk.",
+      "description_en": "Manual pour-over brewed Japanese kissa-style with Kalita wave, clean notes of jasmine and citrus.",
+      "price": 35000,
+      "image_url": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80",
+      "is_available": true,
+      "is_featured": true,
+      "is_popular": false,
+      "is_new": false,
+      "stock": 120,
+      "calories": 5,
+      "tags": [
+        "Single Origin",
+        "Specialty"
+      ]
+    },
+    {
+      "id": "prod-kyoto-cold-brew",
+      "category_id": "cat-coffee",
+      "name": "Kyoto Drip Cold Brew Tonic",
+      "name_en": "Kyoto Drip Cold Brew Tonic",
+      "slug": "kyoto-drip-cold-brew-tonic",
+      "description": "Cold brew tetes lambat 12 jam dipadukan dengan air tonik premium dan irisan lemon segar.",
+      "description_en": "Slow 12-hour Dutch drip cold brew combined with premium tonic water and fresh lemon slice.",
+      "price": 40000,
+      "image_url": "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=800&q=80",
+      "is_available": true,
+      "is_featured": false,
+      "is_popular": true,
+      "is_new": true,
+      "stock": 45,
+      "calories": 60,
+      "tags": [
+        "Refreshing",
+        "Cold Drip"
+      ]
+    },
+    {
+      "id": "prod-souffle-pancake",
+      "category_id": "cat-dessert",
+      "name": "Japanese Fluffy Souffle Pancake",
+      "name_en": "Japanese Fluffy Souffle Pancake",
+      "slug": "japanese-fluffy-souffle-pancake",
+      "description": "Pancake lembut ala Tokyo yang mengembang seperti awan, disajikan dengan butter Hokkaido dan sirup maple murni.",
+      "description_en": "Cloud-like Tokyo-style soufflé pancakes served with whipped Hokkaido butter and pure maple syrup.",
+      "price": 48000,
+      "image_url": "https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=800&q=80",
+      "is_available": true,
+      "is_featured": true,
+      "is_popular": true,
+      "is_new": false,
+      "stock": 35,
+      "calories": 320,
+      "tags": [
+        "Must Try",
+        "Signature Dessert"
+      ]
+    },
+    {
+      "id": "prod-strawberry-sando",
+      "category_id": "cat-dessert",
+      "name": "Strawberry Cream Sando",
+      "name_en": "Strawberry Cream Sando",
+      "slug": "strawberry-cream-sando",
+      "description": "Roti shokupan susu Jepang empuk dengan isian fresh strawberry utuh dan diplomat cream yang ringan.",
+      "description_en": "Japanese fluffy shokupan milk bread stuffed with whole juicy strawberries and light diplomat cream.",
+      "price": 36000,
+      "image_url": "https://images.unsplash.com/photo-1621236378699-8597fee6a1ce?auto=format&fit=crop&w=800&q=80",
+      "is_available": true,
+      "is_featured": false,
+      "is_popular": true,
+      "is_new": false,
+      "stock": 25,
+      "calories": 240,
+      "tags": [
+        "Fruit Sando",
+        "Fresh"
+      ]
+    },
+    {
+      "id": "prod-mille-crepe",
+      "category_id": "cat-dessert",
+      "name": "Matcha Mille Crepe Cake",
+      "name_en": "Matcha Mille Crepe Cake",
+      "slug": "matcha-mille-crepe-cake",
+      "description": "20 lapis crepe tipis lembut diselingi krim matcha Uji dan taburan bubuk matcha ceremonial di atasnya.",
+      "description_en": "20 delicate paper-thin crepes layered with velvety Uji matcha pastry cream and fine matcha dust.",
+      "price": 45000,
+      "image_url": "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=800&q=80",
+      "is_available": true,
+      "is_featured": true,
+      "is_popular": true,
+      "is_new": false,
+      "stock": 18,
+      "calories": 310,
+      "tags": [
+        "Artisan Cake",
+        "Uji Matcha"
+      ]
+    },
+    {
+      "id": "prod-katsu-sando",
+      "category_id": "cat-sando",
+      "name": "Chicken Katsu Shokupan Sando",
+      "name_en": "Chicken Katsu Shokupan Sando",
+      "slug": "chicken-katsu-shokupan-sando",
+      "description": "Fillet ayam goreng krispi berbumbu khas Jepang di antara roti shokupan panggang dengan saus katsu gurih.",
+      "description_en": "Crispy panko chicken cutlet nestled in toasted Japanese shokupan with tangy tonkatsu glaze and cabbage.",
+      "price": 52000,
+      "image_url": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80",
+      "is_available": true,
+      "is_featured": true,
+      "is_popular": true,
+      "is_new": false,
+      "stock": 40,
+      "calories": 460,
+      "tags": [
+        "Savory",
+        "Hearty"
+      ]
+    },
+    {
+      "id": "prod-tamago-sando",
+      "category_id": "cat-sando",
+      "name": "Classic Japanese Tamago Sando",
+      "name_en": "Classic Japanese Tamago Sando",
+      "slug": "classic-japanese-tamago-sando",
+      "description": "Sandwich telur lembut khas konbini Jepang dengan mayo kewpie gurih dan lada putih.",
+      "description_en": "Iconic Japanese egg salad sandwich made with creamy Kewpie mayonnaise and soft milk bread.",
+      "price": 34000,
+      "image_url": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=800&q=80",
+      "is_available": true,
+      "is_featured": false,
+      "is_popular": false,
+      "is_new": false,
+      "stock": 30,
+      "calories": 280,
+      "tags": [
+        "Classic",
+        "Light Meal"
+      ]
+    },
+    {
+      "id": "prod-sencha-tea",
+      "category_id": "cat-tea",
+      "name": "Shizuoka First Flush Sencha",
+      "name_en": "Shizuoka First Flush Sencha",
+      "slug": "shizuoka-first-flush-sencha",
+      "description": "Teh hijau petikan pertama dari Shizuoka dengan aroma rumput segar dan rasa umami manis alami.",
+      "description_en": "First-harvest green tea from Shizuoka, boasting vibrant grassy aroma and natural umami sweetness.",
+      "price": 32000,
+      "image_url": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80",
+      "is_available": true,
+      "is_featured": false,
+      "is_popular": false,
+      "is_new": false,
+      "stock": 50,
+      "calories": 2,
+      "tags": [
+        "Traditional Tea",
+        "Hot Pot"
+      ]
+    },
+    {
+      "id": "prod-yuzu-sparkler",
+      "category_id": "cat-refresh",
+      "name": "Yuzu Honey Soda Sparkler",
+      "name_en": "Yuzu Honey Soda Sparkler",
+      "slug": "yuzu-honey-soda-sparkler",
+      "description": "Kombinasi sitrus jeruk Yuzu Kochi, madu hutan murni, dan soda sparkling yang menyegarkan dahaga.",
+      "description_en": "Zesty Kochi Yuzu citrus blended with wild honey and crisp sparkling soda over crushed ice.",
+      "price": 35000,
+      "image_url": "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80",
+      "is_available": true,
+      "is_featured": false,
+      "is_popular": true,
+      "is_new": true,
+      "stock": 65,
+      "calories": 90,
+      "tags": [
+        "Sparkling",
+        "Non-Coffee"
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "id": "tbl-01",
+      "table_number": "T-01",
+      "name": "Tatami Zen Room A",
+      "capacity": 4,
+      "area": "tatami",
+      "is_active": true,
+      "description": "Meja duduk lesehan beralas tatami otentik dengan pemandangan taman."
+    },
+    {
+      "id": "tbl-02",
+      "table_number": "T-02",
+      "name": "Tatami Zen Room B",
+      "capacity": 6,
+      "area": "tatami",
+      "is_active": true,
+      "description": "Area tatami luas cocok untuk pertemuan keluarga atau sahabat."
+    },
+    {
+      "id": "tbl-03",
+      "table_number": "T-03",
+      "name": "Tatami Cozy Nook",
+      "capacity": 2,
+      "area": "tatami",
+      "is_active": true,
+      "description": "Sudut intim privat bernuansa Jepang hangat."
+    },
+    {
+      "id": "tbl-04",
+      "table_number": "M-01",
+      "name": "Main Dining Window A",
+      "capacity": 2,
+      "area": "main_hall",
+      "is_active": true,
+      "description": "Dekat jendela besar dengan pencahayaan alami (Komorebi)."
+    },
+    {
+      "id": "tbl-05",
+      "table_number": "M-02",
+      "name": "Main Dining Window B",
+      "capacity": 4,
+      "area": "main_hall",
+      "is_active": true,
+      "description": "Meja kayu jati minimalis di hall utama."
+    },
+    {
+      "id": "tbl-06",
+      "table_number": "M-03",
+      "name": "Main Dining Central",
+      "capacity": 4,
+      "area": "main_hall",
+      "is_active": true,
+      "description": "Pusat ruangan kafe berdekatan dengan counter barista."
+    },
+    {
+      "id": "tbl-07",
+      "table_number": "M-04",
+      "name": "Main Dining Group Table",
+      "capacity": 8,
+      "area": "main_hall",
+      "is_active": true,
+      "description": "Meja komunal panjang untuk grup besar atau work from cafe."
+    },
+    {
+      "id": "tbl-08",
+      "table_number": "G-01",
+      "name": "Garden Terrace 1",
+      "capacity": 2,
+      "area": "garden_terrace",
+      "is_active": true,
+      "description": "Area semi-outdoor di samping pohon bonsai dan batu zen."
+    },
+    {
+      "id": "tbl-09",
+      "table_number": "G-02",
+      "name": "Garden Terrace 2",
+      "capacity": 4,
+      "area": "garden_terrace",
+      "is_active": true,
+      "description": "Udara segar luar ruangan dengan kanopi rindang."
+    },
+    {
+      "id": "tbl-10",
+      "table_number": "B-01",
+      "name": "Slow Bar Counter 1",
+      "capacity": 1,
+      "area": "bar_counter",
+      "is_active": true,
+      "description": "Kursi bar berhadapan langsung dengan barista pour-over."
+    },
+    {
+      "id": "tbl-11",
+      "table_number": "B-02",
+      "name": "Slow Bar Counter 2",
+      "capacity": 1,
+      "area": "bar_counter",
+      "is_active": true,
+      "description": "Kursi bar interaktif untuk pecinta kopi manual brew."
+    }
+  ],
+  "bookings": [
+    {
+      "customer_name": "Sora Takahashi",
+      "customer_phone": "0818223344",
+      "booking_date": "2026-11-05",
+      "booking_time": "15:00",
+      "guest_count": 2,
+      "table_id": "tbl-03",
+      "area_preference": "tatami",
+      "id": "bk-1793697731210",
+      "booking_code": "BKG-20261105-7128",
+      "table_name": "T-03 - Tatami Cozy Nook",
+      "status": "pending",
+      "created_at": "2026-11-03T09:22:11.211Z"
+    },
+    {
+      "id": "bk-1001",
+      "booking_code": "BKG-20261103-01",
+      "customer_name": "Raden Arya",
+      "customer_phone": "081299887766",
+      "customer_email": "raden.arya@gmail.com",
+      "booking_date": "2026-11-03",
+      "booking_time": "14:00",
+      "guest_count": 4,
+      "table_id": "tbl-01",
+      "table_name": "Tatami Zen Room A",
+      "area_preference": "tatami",
+      "notes": "Merayakan ulang tahun pernikahan, mohon disiapkan dekat jendela.",
+      "status": "confirmed",
+      "created_at": "2026-11-03T05:17:39.750Z"
+    },
+    {
+      "id": "bk-1002",
+      "booking_code": "BKG-20261103-02",
+      "customer_name": "Siti Rahmawati",
+      "customer_phone": "085711223344",
+      "customer_email": "siti.rahma@yahoo.com",
+      "booking_date": "2026-11-03",
+      "booking_time": "16:30",
+      "guest_count": 2,
+      "table_id": "tbl-04",
+      "table_name": "Main Dining Window A",
+      "area_preference": "main_hall",
+      "notes": "Bawa laptop untuk kerja santai.",
+      "status": "pending",
+      "created_at": "2026-11-03T07:17:39.752Z"
+    },
+    {
+      "id": "bk-1003",
+      "booking_code": "BKG-20261104-01",
+      "customer_name": "Dian Kenanga",
+      "customer_phone": "081344556677",
+      "customer_email": "dian.kenanga@gmail.com",
+      "booking_date": "2026-11-04",
+      "booking_time": "11:00",
+      "guest_count": 6,
+      "table_id": "tbl-02",
+      "table_name": "Tatami Zen Room B",
+      "area_preference": "tatami",
+      "notes": "Arisan keluarga kecil, butuh baby chair jika ada.",
+      "status": "confirmed",
+      "created_at": "2026-11-03T01:17:39.752Z"
+    }
+  ],
+  "orders": [
+    {
+      "order_type": "dine_in",
+      "table_number": "T-01",
+      "customer_name": "yano",
+      "customer_phone": "0897382635353",
+      "items": [
+        {
+          "id": "item-0-1793699453857",
+          "order_id": "",
+          "product_id": "prod-matcha-espresso",
+          "product_name": "Matcha Espresso Fusion",
+          "product_image": "https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=800&q=80",
+          "price": 42000,
+          "quantity": 1,
+          "options": {
+            "size": "Large",
+            "sweetness": "No Sugar",
+            "ice": "Normal Ice",
+            "milk": "Fresh Milk"
+          },
+          "subtotal": 47000
+        }
+      ],
+      "subtotal": 47000,
+      "tax_amount": 4700,
+      "service_amount": 2350,
+      "total_amount": 54050,
+      "payment_method": "qris",
+      "id": "ord-1793699471344",
+      "order_code": "ORD-20261103-5429",
+      "payment_status": "paid",
+      "status": "confirmed",
+      "created_at": "2026-11-03T09:51:11.343Z"
+    },
+    {
+      "order_type": "dine_in",
+      "table_number": "T-01",
+      "customer_name": "Sora Takahashi",
+      "customer_phone": "0818223344",
+      "items": [
+        {
+          "id": "item-test-1",
+          "order_id": "",
+          "product_id": "prod-matcha-latte",
+          "product_name": "Iced Uji Matcha Latte",
+          "price": 38000,
+          "quantity": 2,
+          "subtotal": 76000
+        }
+      ],
+      "subtotal": 76000,
+      "tax_amount": 7600,
+      "service_amount": 3800,
+      "total_amount": 87400,
+      "payment_method": "qris",
+      "id": "ord-1793697731263",
+      "order_code": "ORD-20261103-9350",
+      "payment_status": "paid",
+      "status": "confirmed",
+      "created_at": "2026-11-03T09:22:11.263Z"
+    },
+    {
+      "id": "ord-2001",
+      "order_code": "ORD-20261103-01",
+      "order_type": "dine_in",
+      "table_number": "T-01",
+      "customer_name": "Raden Arya",
+      "customer_phone": "081299887766",
+      "customer_email": "raden.arya@gmail.com",
+      "notes": "Matcha dibuat less sweet.",
+      "items": [
+        {
+          "id": "item-1",
+          "order_id": "ord-2001",
+          "product_id": "prod-matcha-latte",
+          "product_name": "Iced Uji Matcha Latte",
+          "price": 38000,
+          "quantity": 2,
+          "options": {
+            "size": "Regular",
+            "sweetness": "Less Sweet (50%)",
+            "ice": "Normal Ice",
+            "milk": "Fresh Milk"
+          },
+          "subtotal": 76000
+        },
+        {
+          "id": "item-2",
+          "order_id": "ord-2001",
+          "product_id": "prod-souffle-pancake",
+          "product_name": "Japanese Fluffy Souffle Pancake",
+          "price": 48000,
+          "quantity": 1,
+          "options": {
+            "notes": "Ekstra sirup maple"
+          },
+          "subtotal": 48000
+        }
+      ],
+      "subtotal": 124000,
+      "tax_amount": 12400,
+      "service_amount": 6200,
+      "total_amount": 142600,
+      "payment_method": "qris",
+      "payment_status": "paid",
+      "status": "preparing",
+      "created_at": "2026-11-03T07:47:39.753Z"
+    },
+    {
+      "id": "ord-2002",
+      "order_code": "ORD-20261103-02",
+      "order_type": "takeaway",
+      "customer_name": "Kevin Pratama",
+      "customer_phone": "08118822331",
+      "notes": "Takeaway bungkus rapat.",
+      "items": [
+        {
+          "id": "item-3",
+          "order_id": "ord-2002",
+          "product_id": "prod-matcha-espresso",
+          "product_name": "Matcha Espresso Fusion",
+          "price": 42000,
+          "quantity": 1,
+          "options": {
+            "size": "Large",
+            "sweetness": "Normal"
+          },
+          "subtotal": 47000
+        },
+        {
+          "id": "item-4",
+          "order_id": "ord-2002",
+          "product_id": "prod-katsu-sando",
+          "product_name": "Chicken Katsu Shokupan Sando",
+          "price": 52000,
+          "quantity": 1,
+          "subtotal": 52000
+        }
+      ],
+      "subtotal": 99000,
+      "tax_amount": 9900,
+      "service_amount": 4950,
+      "total_amount": 113850,
+      "payment_method": "qris",
+      "payment_status": "paid",
+      "status": "ready",
+      "created_at": "2026-11-03T08:29:39.753Z"
+    },
+    {
+      "id": "ord-2003",
+      "order_code": "ORD-20261103-03",
+      "order_type": "dine_in",
+      "table_number": "M-02",
+      "customer_name": "Nadia Utami",
+      "customer_phone": "08529944112",
+      "items": [
+        {
+          "id": "item-5",
+          "order_id": "ord-2003",
+          "product_id": "prod-mille-crepe",
+          "product_name": "Matcha Mille Crepe Cake",
+          "price": 45000,
+          "quantity": 2,
+          "subtotal": 90000
+        },
+        {
+          "id": "item-6",
+          "order_id": "ord-2003",
+          "product_id": "prod-tokyo-drip",
+          "product_name": "Tokyo Hand Drip Coffee",
+          "price": 35000,
+          "quantity": 2,
+          "subtotal": 70000
+        }
+      ],
+      "subtotal": 160000,
+      "tax_amount": 16000,
+      "service_amount": 8000,
+      "total_amount": 184000,
+      "payment_method": "cashier",
+      "payment_status": "paid",
+      "status": "completed",
+      "created_at": "2026-11-03T06:17:39.753Z"
+    }
+  ],
+  "customers": [
+    {
+      "id": "cust-1",
+      "name": "Raden Arya",
+      "phone": "081299887766",
+      "email": "raden.arya@gmail.com",
+      "total_orders": 5,
+      "total_spent": 685000,
+      "last_visit": "2026-11-03"
+    },
+    {
+      "id": "cust-2",
+      "name": "Kevin Pratama",
+      "phone": "08118822331",
+      "email": "kevin.p@gmail.com",
+      "total_orders": 3,
+      "total_spent": 345000,
+      "last_visit": "2026-11-03"
+    },
+    {
+      "id": "cust-3",
+      "name": "Nadia Utami",
+      "phone": "08529944112",
+      "email": "nadia.utami@yahoo.com",
+      "total_orders": 4,
+      "total_spent": 512000,
+      "last_visit": "2026-11-03"
+    },
+    {
+      "id": "cust-4",
+      "name": "Dian Kenanga",
+      "phone": "081344556677",
+      "email": "dian.kenanga@gmail.com",
+      "total_orders": 2,
+      "total_spent": 240000,
+      "last_visit": "2026-11-01"
+    },
+    {
+      "id": "cust-1793697731264",
+      "name": "Sora Takahashi",
+      "phone": "0818223344",
+      "total_orders": 1,
+      "total_spent": 87400,
+      "last_visit": "2026-11-03"
+    },
+    {
+      "id": "cust-1793699471345",
+      "name": "yano",
+      "phone": "0897382635353",
+      "total_orders": 1,
+      "total_spent": 54050,
+      "last_visit": "2026-11-03"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "tx-1793699471344",
+      "transaction_code": "TRX-20261103-5429",
+      "order_id": "ord-1793699471344",
+      "amount": 54050,
+      "payment_method": "qris",
+      "status": "paid",
+      "created_at": "2026-11-03T09:51:11.343Z"
+    },
+    {
+      "id": "tx-1793697731263",
+      "transaction_code": "TRX-20261103-9350",
+      "order_id": "ord-1793697731263",
+      "amount": 87400,
+      "payment_method": "qris",
+      "status": "paid",
+      "created_at": "2026-11-03T09:22:11.263Z"
+    },
+    {
+      "id": "tx-1",
+      "transaction_code": "TRX-20261103-001",
+      "order_id": "ord-2001",
+      "amount": 142600,
+      "payment_method": "qris",
+      "status": "paid",
+      "created_at": "2026-11-03T07:47:39.753Z"
+    },
+    {
+      "id": "tx-2",
+      "transaction_code": "TRX-20261103-002",
+      "order_id": "ord-2002",
+      "amount": 113850,
+      "payment_method": "qris",
+      "status": "paid",
+      "created_at": "2026-11-03T08:29:39.753Z"
+    },
+    {
+      "id": "tx-3",
+      "transaction_code": "TRX-20261103-003",
+      "order_id": "ord-2003",
+      "amount": 184000,
+      "payment_method": "cashier",
+      "status": "paid",
+      "created_at": "2026-11-03T06:17:39.753Z"
+    }
+  ]
+}
