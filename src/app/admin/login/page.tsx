@@ -58,13 +58,7 @@ export default function AdminLoginPage() {
           </div>
         )}
 
-        {/* Credentials Notice Box for Quick Testing */}
-        <div className="p-3 bg-[#E2ECE2]/60 rounded-xl border border-[#C5D8C6] text-[11px] text-[#334234]">
-          <span className="font-bold block mb-0.5">Kredensial Default Admin:</span>
-          <span>Email: <code>admin@komorebi.id</code></span><br />
-          <span>Kata Sandi: <code>adminpassword123</code></span>
-        </div>
-
+        
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1">
             <label className="text-xs font-semibold text-[#7E8680]">Email Admin</label>
