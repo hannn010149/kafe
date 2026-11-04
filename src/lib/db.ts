@@ -135,21 +135,40 @@ export async function getCategories(): Promise<Category[]> {
   cacheLife("minutes");
   cacheTag("categories");
 
-  if (isSupabaseConfigured && supabaseAdmin) {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from("categories")
-        .select("*")
-        .order("sort_order", { ascending: true });
-      if (!error && data && data.length > 0) return data as Category[];
-    } catch (e) {
-      console.warn("Supabase getCategories fallback:", e);
-    }
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from("categories")
+      .select("*")
+      .order("sort_order", { ascending: true });
+    if (error) throw new Error(`Supabase getCategories failed: ${error.message}`);
+    return (data ?? []) as Category[];
   }
   return loadDB().categories.sort((a, b) => a.sort_order - b.sort_order);
 }
 
 export async function createCategory(cat: Omit<Category, "id">): Promise<Category> {
+  if (supabaseAdmin) {
+    const categoryData = {
+      name: cat.name,
+      name_en: cat.name_en,
+      slug: cat.slug,
+      description: cat.description,
+      description_en: cat.description_en,
+      icon: cat.icon,
+      image_url: cat.image_url,
+      sort_order: cat.sort_order ?? 0,
+      is_active: cat.is_active ?? true,
+    };
+    const { data, error } = await supabaseAdmin
+      .from("categories")
+      .insert([categoryData])
+      .select("*")
+      .single();
+    if (error) throw new Error(`Supabase createCategory failed: ${error.message}`);
+    revalidateTag("categories", { expire: 0 });
+    return data as Category;
+  }
+
   const db = loadDB();
   const newCat: Category = {
     ...cat,
@@ -159,50 +178,52 @@ export async function createCategory(cat: Omit<Category, "id">): Promise<Categor
   };
   db.categories.push(newCat);
   saveDB(db);
-
-  if (isSupabaseConfigured && supabaseAdmin) {
-    try {
-      await supabaseAdmin.from("categories").insert([newCat]);
-    } catch (e) {
-      console.warn("Supabase createCategory error:", e);
-    }
-  }
   revalidateTag("categories", { expire: 0 });
   return newCat;
 }
 
 export async function updateCategory(id: string, updates: Partial<Category>): Promise<Category | null> {
+  if (supabaseAdmin) {
+    const categoryUpdates = { ...updates };
+    delete categoryUpdates.id;
+    const { data, error } = await supabaseAdmin
+      .from("categories")
+      .update(categoryUpdates)
+      .eq("id", id)
+      .select("*")
+      .maybeSingle();
+    if (error) throw new Error(`Supabase updateCategory failed: ${error.message}`);
+    if (data) revalidateTag("categories", { expire: 0 });
+    return data as Category | null;
+  }
+
   const db = loadDB();
   const idx = db.categories.findIndex((c) => c.id === id);
   if (idx === -1) return null;
   db.categories[idx] = { ...db.categories[idx], ...updates };
   saveDB(db);
-
-  if (isSupabaseConfigured && supabaseAdmin) {
-    try {
-      await supabaseAdmin.from("categories").update(updates).eq("id", id);
-    } catch (e) {
-      console.warn("Supabase updateCategory error:", e);
-    }
-  }
   revalidateTag("categories", { expire: 0 });
   return db.categories[idx];
 }
 
 export async function deleteCategory(id: string): Promise<boolean> {
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from("categories")
+      .delete()
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
+    if (error) throw new Error(`Supabase deleteCategory failed: ${error.message}`);
+    if (data) revalidateTag("categories", { expire: 0 });
+    return Boolean(data);
+  }
+
   const db = loadDB();
   const initLen = db.categories.length;
   db.categories = db.categories.filter((c) => c.id !== id);
   if (db.categories.length === initLen) return false;
   saveDB(db);
-
-  if (isSupabaseConfigured && supabaseAdmin) {
-    try {
-      await supabaseAdmin.from("categories").delete().eq("id", id);
-    } catch (e) {
-      console.warn("Supabase deleteCategory error:", e);
-    }
-  }
   revalidateTag("categories", { expire: 0 });
   return true;
 }
@@ -215,25 +236,22 @@ export async function getProducts(options?: { category_id?: string; query?: stri
   cacheLife("minutes");
   cacheTag("products");
 
-  if (isSupabaseConfigured && supabaseAdmin) {
-    try {
-      let query = supabaseAdmin.from("products").select("*");
-      if (options?.category_id) query = query.eq("category_id", options.category_id);
-      if (options?.onlyAvailable) query = query.eq("is_available", true);
-      const { data, error } = await query;
-      if (!error && data && data.length > 0) {
-        let prods = data as Product[];
-        if (options?.query) {
-          const q = options.query.toLowerCase();
-          prods = prods.filter(
-            (p) => p.name.toLowerCase().includes(q) || (p.description && p.description.toLowerCase().includes(q))
-          );
-        }
-        return prods;
-      }
-    } catch (e) {
-      console.warn("Supabase getProducts fallback:", e);
+  if (supabaseAdmin) {
+    let query = supabaseAdmin.from("products").select("*");
+    if (options?.category_id && options.category_id !== "all") {
+      query = query.eq("category_id", options.category_id);
     }
+    if (options?.onlyAvailable) query = query.eq("is_available", true);
+    const { data, error } = await query;
+    if (error) throw new Error(`Supabase getProducts failed: ${error.message}`);
+    let prods = (data ?? []) as Product[];
+    if (options?.query) {
+      const q = options.query.toLowerCase();
+      prods = prods.filter(
+        (p) => p.name.toLowerCase().includes(q) || (p.description && p.description.toLowerCase().includes(q))
+      );
+    }
+    return prods;
   }
 
   let prods = [...loadDB().products];
@@ -253,34 +271,82 @@ export async function getProducts(options?: { category_id?: string; query?: stri
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
+  if (supabaseAdmin) {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+    const { data, error } = await supabaseAdmin
+      .from("products")
+      .select("*")
+      .eq(isUuid ? "id" : "slug", id)
+      .maybeSingle();
+    if (error) throw new Error(`Supabase getProductById failed: ${error.message}`);
+    return data as Product | null;
+  }
+
   const db = loadDB();
   return db.products.find((p) => p.id === id || p.slug === id) || null;
 }
 
 export async function createProduct(prod: Omit<Product, "id">): Promise<Product> {
+  const slug = prod.slug || prod.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  if (supabaseAdmin) {
+    const productData = {
+      category_id: prod.category_id,
+      name: prod.name,
+      name_en: prod.name_en,
+      slug,
+      description: prod.description,
+      description_en: prod.description_en,
+      price: prod.price,
+      image_url: prod.image_url,
+      is_available: prod.is_available,
+      is_featured: prod.is_featured,
+      is_popular: prod.is_popular,
+      is_new: prod.is_new,
+      stock: prod.stock,
+      calories: prod.calories,
+      tags: prod.tags,
+      variants: prod.variants,
+    };
+    const { data, error } = await supabaseAdmin
+      .from("products")
+      .insert([productData])
+      .select("*")
+      .single();
+    if (error) throw new Error(`Supabase createProduct failed: ${error.message}`);
+    revalidateTag("products", { expire: 0 });
+    return data as Product;
+  }
+
   const db = loadDB();
   const newProd: Product = {
     ...prod,
     id: `prod-${Date.now()}`,
-    slug: prod.slug || prod.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+    slug,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
   db.products.unshift(newProd);
   saveDB(db);
-
-  if (isSupabaseConfigured && supabaseAdmin) {
-    try {
-      await supabaseAdmin.from("products").insert([newProd]);
-    } catch (e) {
-      console.warn("Supabase createProduct error:", e);
-    }
-  }
   revalidateTag("products", { expire: 0 });
   return newProd;
 }
 
 export async function updateProduct(id: string, updates: Partial<Product>): Promise<Product | null> {
+  if (supabaseAdmin) {
+    const productUpdates = { ...updates };
+    delete productUpdates.id;
+    delete productUpdates.created_at;
+    const { data, error } = await supabaseAdmin
+      .from("products")
+      .update({ ...productUpdates, updated_at: new Date().toISOString() })
+      .eq("id", id)
+      .select("*")
+      .maybeSingle();
+    if (error) throw new Error(`Supabase updateProduct failed: ${error.message}`);
+    if (data) revalidateTag("products", { expire: 0 });
+    return data as Product | null;
+  }
+
   const db = loadDB();
   const idx = db.products.findIndex((p) => p.id === id);
   if (idx === -1) return null;
@@ -290,32 +356,28 @@ export async function updateProduct(id: string, updates: Partial<Product>): Prom
     updated_at: new Date().toISOString(),
   };
   saveDB(db);
-
-  if (isSupabaseConfigured && supabaseAdmin) {
-    try {
-      await supabaseAdmin.from("products").update(updates).eq("id", id);
-    } catch (e) {
-      console.warn("Supabase updateProduct error:", e);
-    }
-  }
   revalidateTag("products", { expire: 0 });
   return db.products[idx];
 }
 
 export async function deleteProduct(id: string): Promise<boolean> {
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from("products")
+      .delete()
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
+    if (error) throw new Error(`Supabase deleteProduct failed: ${error.message}`);
+    if (data) revalidateTag("products", { expire: 0 });
+    return Boolean(data);
+  }
+
   const db = loadDB();
   const initLen = db.products.length;
   db.products = db.products.filter((p) => p.id !== id);
   if (db.products.length === initLen) return false;
   saveDB(db);
-
-  if (isSupabaseConfigured && supabaseAdmin) {
-    try {
-      await supabaseAdmin.from("products").delete().eq("id", id);
-    } catch (e) {
-      console.warn("Supabase deleteProduct error:", e);
-    }
-  }
   revalidateTag("products", { expire: 0 });
   return true;
 }
@@ -328,18 +390,34 @@ export async function getTables(): Promise<Table[]> {
   cacheLife("minutes");
   cacheTag("tables");
 
-  if (isSupabaseConfigured && supabaseAdmin) {
-    try {
-      const { data, error } = await supabaseAdmin.from("tables").select("*").order("table_number");
-      if (!error && data && data.length > 0) return data as Table[];
-    } catch (e) {
-      console.warn("Supabase getTables fallback:", e);
-    }
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin.from("tables").select("*").order("table_number");
+    if (error) throw new Error(`Supabase getTables failed: ${error.message}`);
+    return (data ?? []) as Table[];
   }
   return loadDB().tables;
 }
 
 export async function createTable(t: Omit<Table, "id">): Promise<Table> {
+  if (supabaseAdmin) {
+    const tableData = {
+      table_number: t.table_number,
+      name: t.name,
+      capacity: t.capacity,
+      area: t.area,
+      is_active: t.is_active,
+      description: t.description,
+    };
+    const { data, error } = await supabaseAdmin
+      .from("tables")
+      .insert([tableData])
+      .select("*")
+      .single();
+    if (error) throw new Error(`Supabase createTable failed: ${error.message}`);
+    revalidateTag("tables", { expire: 0 });
+    return data as Table;
+  }
+
   const db = loadDB();
   const newTable: Table = { ...t, id: `tbl-${Date.now()}` };
   db.tables.push(newTable);
@@ -349,6 +427,20 @@ export async function createTable(t: Omit<Table, "id">): Promise<Table> {
 }
 
 export async function updateTable(id: string, updates: Partial<Table>): Promise<Table | null> {
+  if (supabaseAdmin) {
+    const tableUpdates = { ...updates };
+    delete tableUpdates.id;
+    const { data, error } = await supabaseAdmin
+      .from("tables")
+      .update(tableUpdates)
+      .eq("id", id)
+      .select("*")
+      .maybeSingle();
+    if (error) throw new Error(`Supabase updateTable failed: ${error.message}`);
+    if (data) revalidateTag("tables", { expire: 0 });
+    return data as Table | null;
+  }
+
   const db = loadDB();
   const idx = db.tables.findIndex((t) => t.id === id);
   if (idx === -1) return null;
@@ -359,6 +451,18 @@ export async function updateTable(id: string, updates: Partial<Table>): Promise<
 }
 
 export async function deleteTable(id: string): Promise<boolean> {
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from("tables")
+      .delete()
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
+    if (error) throw new Error(`Supabase deleteTable failed: ${error.message}`);
+    if (data) revalidateTag("tables", { expire: 0 });
+    return Boolean(data);
+  }
+
   const db = loadDB();
   const initial = db.tables.length;
   db.tables = db.tables.filter((t) => t.id !== id);
@@ -371,11 +475,36 @@ export async function deleteTable(id: string): Promise<boolean> {
 // -------------------------------------------------------------
 // BOOKINGS & DOUBLE-BOOKING PREVENTION
 // -------------------------------------------------------------
+function normalizeBookingTime(booking: Booking): Booking {
+  return { ...booking, booking_time: booking.booking_time.slice(0, 5) };
+}
+
 export async function checkTableAvailability(
   booking_date: string,
   booking_time: string,
   table_id?: string
 ): Promise<{ available: boolean; conflictWith?: Booking }> {
+  if (supabaseAdmin) {
+    if (!table_id) return { available: true };
+    const { data, error } = await supabaseAdmin
+      .from("bookings")
+      .select("*")
+      .eq("booking_date", booking_date)
+      .eq("table_id", table_id)
+      .not("status", "in", '("rejected","cancelled")');
+    if (error) throw new Error(`Supabase checkTableAvailability failed: ${error.message}`);
+    const [targetH, targetM] = booking_time.split(":").map(Number);
+    const targetMins = targetH * 60 + targetM;
+    const conflict = (data ?? []).find((row) => {
+      const [existingH, existingM] = String(row.booking_time).split(":").map(Number);
+      return Math.abs(existingH * 60 + existingM - targetMins) < 90;
+    });
+    return {
+      available: !conflict,
+      conflictWith: conflict as Booking | undefined,
+    };
+  }
+
   const db = loadDB();
   
   // Find if there's an active booking on this exact date and time
@@ -406,16 +535,13 @@ export async function checkTableAvailability(
 }
 
 export async function getBookings(): Promise<Booking[]> {
-  if (isSupabaseConfigured && supabaseAdmin) {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from("bookings")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (!error && data && data.length > 0) return data as Booking[];
-    } catch (e) {
-      console.warn("Supabase getBookings fallback:", e);
-    }
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from("bookings")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(`Supabase getBookings failed: ${error.message}`);
+    return ((data ?? []) as Booking[]).map(normalizeBookingTime);
   }
   return [...loadDB().bookings].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -423,13 +549,21 @@ export async function getBookings(): Promise<Booking[]> {
 }
 
 export async function getBookingByCode(code: string): Promise<Booking | null> {
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from("bookings")
+      .select("*")
+      .ilike("booking_code", code)
+      .maybeSingle();
+    if (error) throw new Error(`Supabase getBookingByCode failed: ${error.message}`);
+    return data ? normalizeBookingTime(data as Booking) : null;
+  }
+
   const db = loadDB();
   return db.bookings.find((b) => b.booking_code.toLowerCase() === code.toLowerCase()) || null;
 }
 
 export async function createBooking(data: Omit<Booking, "id" | "booking_code" | "status" | "created_at">): Promise<Booking> {
-  const db = loadDB();
-  
   // Enforce double booking check
   if (data.table_id) {
     const { available } = await checkTableAvailability(data.booking_date, data.booking_time, data.table_id);
@@ -438,60 +572,110 @@ export async function createBooking(data: Omit<Booking, "id" | "booking_code" | 
     }
   }
 
-  // Generate unique booking code BKG-YYYYMMDD-XXXX
-  const dateStr = data.booking_date.replace(/-/g, "");
+  // Supabase generates the UUID id; this public code identifies the booking.
   const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-  const booking_code = `BKG-${dateStr}-${randomSuffix}`;
+  const booking_code = `bk-${Date.now()}-${randomSuffix}`;
 
   // Find table name if table_id provided
   let table_name = data.table_name;
   if (data.table_id && !table_name) {
-    const table = db.tables.find((t) => t.id === data.table_id);
+    const tables = await getTables();
+    const table = tables.find((t) => t.id === data.table_id);
     if (table) table_name = `${table.table_number} - ${table.name}`;
   }
 
-  const newBooking: Booking = {
-    ...data,
-    id: `bk-${Date.now()}`,
+  const bookingData: Omit<Booking, "id" | "created_at" | "updated_at"> = {
+    customer_name: data.customer_name,
+    customer_phone: data.customer_phone,
+    customer_email: data.customer_email,
+    booking_date: data.booking_date,
+    booking_time: data.booking_time,
+    guest_count: data.guest_count,
+    table_id: data.table_id,
     booking_code,
     table_name,
+    area_preference: data.area_preference,
+    notes: data.notes,
     status: "pending",
-    created_at: new Date().toISOString(),
+    rejection_reason: data.rejection_reason,
   };
 
+  if (supabaseAdmin) {
+    const { data: createdBooking, error } = await supabaseAdmin
+      .from("bookings")
+      .insert([bookingData])
+      .select("*")
+      .single();
+    if (error) throw new Error(`Supabase createBooking failed: ${error.message}`);
+    return normalizeBookingTime(createdBooking as Booking);
+  }
+
+  const db = loadDB();
+  const newBooking: Booking = {
+    ...bookingData,
+    id: `bk-${Date.now()}`,
+    created_at: new Date().toISOString(),
+  };
   db.bookings.unshift(newBooking);
   saveDB(db);
-
-  if (isSupabaseConfigured && supabaseAdmin) {
-    try {
-      await supabaseAdmin.from("bookings").insert([newBooking]);
-    } catch (e) {
-      console.warn("Supabase createBooking error:", e);
-    }
-  }
   return newBooking;
 }
 
-export async function updateBookingStatus(id: string, status: BookingStatus, rejection_reason?: string): Promise<Booking | null> {
+export async function updateBooking(bookingCode: string, updates: Partial<Booking>): Promise<Booking | null> {
+  const bookingUpdates = { ...updates };
+  delete bookingUpdates.id;
+  delete bookingUpdates.booking_code;
+  delete bookingUpdates.created_at;
+  const updatedAt = new Date().toISOString();
+
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from("bookings")
+      .update({ ...bookingUpdates, updated_at: updatedAt })
+      .eq("booking_code", bookingCode)
+      .select("*")
+      .maybeSingle();
+    if (error) throw new Error(`Supabase updateBooking failed: ${error.message}`);
+    return data ? normalizeBookingTime(data as Booking) : null;
+  }
+
   const db = loadDB();
-  const idx = db.bookings.findIndex((b) => b.id === id);
+  const idx = db.bookings.findIndex((b) => b.booking_code.toLowerCase() === bookingCode.toLowerCase());
   if (idx === -1) return null;
 
-  db.bookings[idx].status = status;
-  if (rejection_reason) {
-    db.bookings[idx].rejection_reason = rejection_reason;
-  }
-  db.bookings[idx].updated_at = new Date().toISOString();
+  db.bookings[idx] = { ...db.bookings[idx], ...bookingUpdates, updated_at: updatedAt };
   saveDB(db);
-
-  if (isSupabaseConfigured && supabaseAdmin) {
-    try {
-      await supabaseAdmin.from("bookings").update({ status, rejection_reason, updated_at: new Date().toISOString() }).eq("id", id);
-    } catch (e) {
-      console.warn("Supabase updateBookingStatus error:", e);
-    }
-  }
   return db.bookings[idx];
+}
+
+export async function updateBookingStatus(
+  bookingCode: string,
+  status: BookingStatus,
+  rejection_reason?: string
+): Promise<Booking | null> {
+  return updateBooking(bookingCode, { status, rejection_reason });
+}
+
+export async function deleteBooking(bookingCode: string): Promise<boolean> {
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from("bookings")
+      .delete()
+      .eq("booking_code", bookingCode)
+      .select("booking_code")
+      .maybeSingle();
+    if (error) throw new Error(`Supabase deleteBooking failed: ${error.message}`);
+    return Boolean(data);
+  }
+
+  const db = loadDB();
+  const initialLength = db.bookings.length;
+  db.bookings = db.bookings.filter(
+    (booking) => booking.booking_code.toLowerCase() !== bookingCode.toLowerCase()
+  );
+  if (db.bookings.length === initialLength) return false;
+  saveDB(db);
+  return true;
 }
 
 // -------------------------------------------------------------

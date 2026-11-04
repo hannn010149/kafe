@@ -33,12 +33,12 @@ export default function BookingsManagerClient({
   const [rejectionReason, setRejectionReason] = useState("");
 
   const handleUpdateStatus = async (
-    bookingId: string,
+    bookingCode: string,
     status: BookingStatus,
     reason?: string
   ) => {
     try {
-      const res = await fetch(`/api/bookings/${bookingId}`, {
+      const res = await fetch(`/api/bookings/${bookingCode}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, rejection_reason: reason }),
@@ -47,12 +47,12 @@ export default function BookingsManagerClient({
       if (!res.ok) throw new Error(data.error);
 
       setBookings((prev) =>
-        prev.map((b) => (b.id === bookingId ? data.booking : b))
+        prev.map((b) => (b.booking_code === bookingCode ? data.booking : b))
       );
       setRejectingBooking(null);
       setRejectionReason("");
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Gagal memperbarui reservasi.");
     }
   };
 
@@ -217,7 +217,7 @@ export default function BookingsManagerClient({
                   <>
                     <button
                       type="button"
-                      onClick={() => handleUpdateStatus(b.id, "confirmed")}
+                      onClick={() => handleUpdateStatus(b.booking_code, "confirmed")}
                       className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold"
                     >
                       Konfirmasi
@@ -235,7 +235,7 @@ export default function BookingsManagerClient({
                 {b.status === "confirmed" && (
                   <button
                     type="button"
-                    onClick={() => handleUpdateStatus(b.id, "completed")}
+                    onClick={() => handleUpdateStatus(b.booking_code, "completed")}
                     className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold"
                   >
                     Check-in Selesai
@@ -276,7 +276,7 @@ export default function BookingsManagerClient({
                 type="button"
                 onClick={() =>
                   handleUpdateStatus(
-                    rejectingBooking.id,
+                    rejectingBooking.booking_code,
                     "rejected",
                     rejectionReason || "Kapasitas penuh"
                   )
@@ -292,4 +292,3 @@ export default function BookingsManagerClient({
     </div>
   );
 }
-
