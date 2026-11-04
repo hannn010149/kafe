@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Category } from "@/types";
-import { Plus, Edit, Trash2, CheckCircle2, X } from "lucide-react";
+import { Plus, Edit, Trash2, X, Database, LoaderCircle } from "lucide-react";
 
 interface CategoryManagerClientProps {
   initialCategories: Category[];
@@ -11,6 +12,7 @@ interface CategoryManagerClientProps {
 export default function CategoryManagerClient({
   initialCategories,
 }: CategoryManagerClientProps) {
+  const router = useRouter();
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -22,6 +24,34 @@ export default function CategoryManagerClient({
   const [descriptionEn, setDescriptionEn] = useState("");
   const [sortOrder, setSortOrder] = useState<number>(1);
   const [saving, setSaving] = useState(false);
+  const [importingSeed, setImportingSeed] = useState(false);
+  const [importMessage, setImportMessage] = useState("");
+
+  const handleImportSeed = async () => {
+    setImportingSeed(true);
+    setImportMessage("");
+    try {
+      const response = await fetch("/api/admin/seed-catalog", { method: "POST" });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Gagal mengimpor data awal.");
+
+      const categoriesResponse = await fetch("/api/categories", { cache: "no-store" });
+      const categoriesResult = await categoriesResponse.json();
+      if (!categoriesResponse.ok) {
+        throw new Error(categoriesResult.error || "Data kategori berhasil diimpor, tetapi gagal dimuat ulang.");
+      }
+      setCategories(categoriesResult.categories);
+      setImportMessage(
+        `Impor selesai: ${result.categoriesInserted} kategori dan ${result.productsInserted} produk ditambahkan; ` +
+        `${result.categoriesSkipped} kategori dan ${result.productsSkipped} produk yang sudah ada dilewati.`
+      );
+      router.refresh();
+    } catch (error: unknown) {
+      setImportMessage(error instanceof Error ? error.message : "Gagal mengimpor data awal.");
+    } finally {
+      setImportingSeed(false);
+    }
+  };
 
   const openAdd = () => {
     setEditingCategory(null);
@@ -85,8 +115,8 @@ export default function CategoryManagerClient({
         setCategories((prev) => [...prev, data.category]);
       }
       setIsModalOpen(false);
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Gagal menyimpan kategori.");
     } finally {
       setSaving(false);
     }
@@ -98,8 +128,8 @@ export default function CategoryManagerClient({
       const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Gagal menghapus");
       setCategories((prev) => prev.filter((c) => c.id !== id));
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Gagal menghapus kategori.");
     }
   };
 
@@ -115,15 +145,36 @@ export default function CategoryManagerClient({
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={openAdd}
-          className="bg-[#536B54] hover:bg-[#425543] text-white px-5 py-2.5 rounded-full text-xs font-semibold flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Tambah Kategori Baru</span>
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={handleImportSeed}
+            disabled={importingSeed}
+            className="bg-white hover:bg-[#F4F0E7] disabled:opacity-60 text-[#536B54] border border-[#D8DDCF] px-4 py-2.5 rounded-full text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer"
+          >
+            {importingSeed ? (
+              <LoaderCircle className="w-4 h-4 animate-spin" />
+            ) : (
+              <Database className="w-4 h-4" />
+            )}
+            <span>{importingSeed ? "Mengimpor..." : "Impor Data Awal"}</span>
+          </button>
+          <button
+            type="button"
+            onClick={openAdd}
+            className="bg-[#536B54] hover:bg-[#425543] text-white px-5 py-2.5 rounded-full text-xs font-semibold flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Tambah Kategori Baru</span>
+          </button>
+        </div>
       </div>
+
+      {importMessage && (
+        <p role="status" className="rounded-xl border border-[#D8DDCF] bg-white px-4 py-3 text-xs text-[#425543]">
+          {importMessage}
+        </p>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {categories.map((cat) => (
@@ -266,4 +317,3 @@ export default function CategoryManagerClient({
     </div>
   );
 }
-
