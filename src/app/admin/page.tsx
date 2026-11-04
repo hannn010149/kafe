@@ -1,5 +1,6 @@
 import React from "react";
 import { getReportsData, getProducts, getCategories } from "@/lib/db";
+import { requireAdminSession } from "@/lib/admin-auth";
 import Link from "next/link";
 import {
   DollarSign,
@@ -12,6 +13,7 @@ import {
 } from "lucide-react";
 
 export default async function AdminOverviewPage() {
+  await requireAdminSession();
   const [reports, products, categories] = await Promise.all([
     getReportsData(),
     getProducts(),

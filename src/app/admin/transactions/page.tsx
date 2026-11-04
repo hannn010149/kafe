@@ -1,8 +1,10 @@
 import React from "react";
 import { getTransactions, getOrders } from "@/lib/db";
 import { QrCode, CreditCard, Building } from "lucide-react";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export default async function AdminTransactionsPage() {
+  await requireAdminSession();
   const [transactions, orders] = await Promise.all([
     getTransactions(),
     getOrders(),

@@ -122,7 +122,7 @@ export interface CartItem {
 export interface OrderItem {
   id: string;
   order_id: string;
-  product_id: string;
+  product_id: string | null;
   product_name: string;
   product_image?: string;
   price: number;
@@ -186,4 +186,3 @@ export interface ImageSearchResult {
   photographer?: string;
   source: string;
 }
-

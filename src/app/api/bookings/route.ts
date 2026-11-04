@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBookings, createBooking, checkTableAvailability } from "@/lib/db";
+import { ADMIN_AUTH_COOKIE, isValidAdminSession } from "@/lib/admin-auth";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  if (!isValidAdminSession(request.cookies.get(ADMIN_AUTH_COOKIE)?.value)) {
+    return NextResponse.json({ success: false, error: "Autentikasi admin diperlukan." }, { status: 401 });
+  }
+
   try {
     const bookings = await getBookings();
     return NextResponse.json({ success: true, count: bookings.length, bookings });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Gagal memuat data reservasi.";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
@@ -39,8 +45,8 @@ export async function POST(request: NextRequest) {
 
     const booking = await createBooking(body);
     return NextResponse.json({ success: true, booking }, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Gagal membuat reservasi.";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
-

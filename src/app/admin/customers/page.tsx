@@ -1,8 +1,10 @@
 import React from "react";
 import { getCustomers } from "@/lib/db";
-import { Users, Phone, Mail, DollarSign } from "lucide-react";
+import { Phone, Mail } from "lucide-react";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export default async function AdminCustomersPage() {
+  await requireAdminSession();
   const customers = await getCustomers();
 
   return (
@@ -72,4 +74,3 @@ export default async function AdminCustomersPage() {
     </div>
   );
 }
-

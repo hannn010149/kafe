@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { randomUUID } from "node:crypto";
 import {
   CafeSettings,
   Category,
@@ -496,139 +497,212 @@ export async function updateBookingStatus(id: string, status: BookingStatus, rej
 // -------------------------------------------------------------
 // ORDERS & TRANSACTIONS
 // -------------------------------------------------------------
-export async function getOrders(): Promise<Order[]> {
-  if (isSupabaseConfigured && supabaseAdmin) {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from("orders")
-        .select("*, order_items(*)")
-        .order("created_at", { ascending: false });
-      if (!error && data && data.length > 0) return data as Order[];
-    } catch (e) {
-      console.warn("Supabase getOrders fallback:", e);
-    }
-  }
-  return [...loadDB().orders].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
-}
-
-export async function getOrderByCode(code: string): Promise<Order | null> {
-  const db = loadDB();
-  const query = code.toLowerCase().trim();
-  return (
-    db.orders.find(
-      (o) =>
-        o.order_code.toLowerCase() === query ||
-        o.customer_phone.includes(query) ||
-        o.id === query
-    ) || null
-  );
-}
-
-export async function createOrder(data: {
+export interface CreateOrderInput {
   order_type: "dine_in" | "takeaway";
   table_number?: string;
   customer_name: string;
   customer_phone: string;
   customer_email?: string;
   notes?: string;
-  items: Order["items"];
+  items: Array<{
+    product_id: string | null;
+    product_name: string;
+    product_image?: string;
+    price: number;
+    quantity: number;
+    options?: Order["items"][number]["options"];
+    subtotal: number;
+  }>;
   subtotal: number;
   tax_amount: number;
   service_amount: number;
   total_amount: number;
   payment_method: Order["payment_method"];
-}): Promise<Order> {
-  const db = loadDB();
+}
+
+export class OrderStorageError extends Error {
+  constructor(
+    message: string,
+    public readonly statusCode = 503
+  ) {
+    super(message);
+    this.name = "OrderStorageError";
+  }
+}
+
+function requireSupabaseOrderStore() {
+  if (!isSupabaseConfigured || !supabaseAdmin) {
+    throw new OrderStorageError("Penyimpanan pesanan belum tersedia. Silakan coba lagi nanti.");
+  }
+  return supabaseAdmin;
+}
+
+function mapSupabaseOrder(row: Record<string, unknown>): Order {
+  const { order_items, ...order } = row;
+  return {
+    ...order,
+    items: Array.isArray(order_items) ? order_items : [],
+  } as Order;
+}
+
+export async function getOrders(): Promise<Order[]> {
+  const client = requireSupabaseOrderStore();
+  const { data, error } = await client
+    .from("orders")
+    .select("*, order_items(*)")
+    .order("created_at", { ascending: false });
+  if (error) {
+    console.error("Supabase getOrders failed:", error.code);
+    throw new OrderStorageError("Gagal memuat pesanan dari database.");
+  }
+  return (data ?? []).map((row) => mapSupabaseOrder(row as Record<string, unknown>));
+}
+
+export async function getOrderByCode(code: string): Promise<Order | null> {
+  const client = requireSupabaseOrderStore();
+  const { data, error } = await client
+    .from("orders")
+    .select("*, order_items(*)")
+    .eq("order_code", code.trim().toUpperCase())
+    .maybeSingle();
+  if (error) {
+    console.error("Supabase getOrderByCode failed:", error.code);
+    throw new OrderStorageError("Gagal memuat status pesanan.");
+  }
+  return data ? mapSupabaseOrder(data as Record<string, unknown>) : null;
+}
+
+export async function createOrder(data: CreateOrderInput): Promise<Order> {
+  const client = requireSupabaseOrderStore();
+  const validOrderTypes = ["dine_in", "takeaway"];
+  const validPaymentMethods = ["qris", "bank_transfer", "cashier"];
+  const amounts = [data.subtotal, data.tax_amount, data.service_amount, data.total_amount];
+  if (
+    !data.customer_name?.trim() ||
+    !data.customer_phone?.trim() ||
+    (data.table_number !== undefined && typeof data.table_number !== "string") ||
+    (data.customer_email !== undefined && typeof data.customer_email !== "string") ||
+    (data.notes !== undefined && typeof data.notes !== "string") ||
+    !validOrderTypes.includes(data.order_type) ||
+    !validPaymentMethods.includes(data.payment_method) ||
+    !Array.isArray(data.items) ||
+    data.items.length === 0 ||
+    amounts.some((amount) => !Number.isFinite(amount) || amount < 0) ||
+    data.items.some((item) =>
+      !item.product_name?.trim() ||
+      !Number.isSafeInteger(item.quantity) ||
+      item.quantity < 1 ||
+      !Number.isFinite(item.price) ||
+      item.price < 0 ||
+      !Number.isFinite(item.subtotal) ||
+      item.subtotal < 0
+    )
+  ) {
+    throw new OrderStorageError("Data pesanan tidak valid. Periksa kembali keranjang dan informasi pemesan.", 400);
+  }
+
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
-  const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-  const order_code = `ORD-${dateStr}-${randomSuffix}`;
-
-  const newOrder: Order = {
-    ...data,
-    id: `ord-${Date.now()}`,
+  const suffix = randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase();
+  const order_code = `ORD-${dateStr}-${suffix}`;
+  const payment_status = data.payment_method === "cashier" ? "pending" : "paid";
+  const order = {
     order_code,
-    payment_status: data.payment_method === "cashier" ? "pending" : "paid",
+    order_type: data.order_type,
+    table_number: data.order_type === "dine_in" ? data.table_number || null : null,
+    customer_name: data.customer_name.trim(),
+    customer_phone: data.customer_phone.trim(),
+    customer_email: data.customer_email?.trim() || null,
+    notes: data.notes?.trim() || null,
+    subtotal: data.subtotal,
+    tax_amount: data.tax_amount,
+    service_amount: data.service_amount,
+    total_amount: data.total_amount,
+    payment_method: data.payment_method,
+    payment_status,
     status: "confirmed",
     created_at: now.toISOString(),
   };
+  const items = data.items.map((item) => ({
+    ...item,
+    product_id: item.product_id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.product_id)
+      ? item.product_id
+      : null,
+  }));
+  const transactionCode = `TRX-${dateStr}-${suffix}`;
 
-  db.orders.unshift(newOrder);
-
-  // Record transaction
-  const newTx: Transaction = {
-    id: `tx-${Date.now()}`,
-    transaction_code: `TRX-${dateStr}-${randomSuffix}`,
-    order_id: newOrder.id,
-    amount: newOrder.total_amount,
-    payment_method: newOrder.payment_method,
-    status: newOrder.payment_status,
-    created_at: now.toISOString(),
-  };
-  db.transactions.unshift(newTx);
-
-  // Update or record customer
-  const custIdx = db.customers.findIndex((c) => c.phone === data.customer_phone);
-  if (custIdx > -1) {
-    db.customers[custIdx].total_orders += 1;
-    db.customers[custIdx].total_spent += data.total_amount;
-    db.customers[custIdx].last_visit = now.toISOString().slice(0, 10);
-  } else {
-    db.customers.push({
-      id: `cust-${Date.now()}`,
-      name: data.customer_name,
-      phone: data.customer_phone,
-      email: data.customer_email,
-      total_orders: 1,
-      total_spent: data.total_amount,
-      last_visit: now.toISOString().slice(0, 10),
-    });
+  const { data: savedOrder, error } = await client.rpc("create_order_with_items", {
+    p_order: order,
+    p_items: items,
+    p_transaction_code: transactionCode,
+  });
+  if (error) {
+    console.error("Supabase createOrder failed:", error.code);
+    throw new OrderStorageError("Pesanan gagal disimpan. Silakan coba kembali.");
   }
-
-  saveDB(db);
-
-  if (isSupabaseConfigured && supabaseAdmin) {
-    try {
-      await supabaseAdmin.from("orders").insert([newOrder]);
-    } catch (e) {
-      console.warn("Supabase createOrder error:", e);
-    }
+  if (!savedOrder || typeof savedOrder !== "object" || !Array.isArray(savedOrder.items)) {
+    throw new OrderStorageError("Pesanan belum dapat diverifikasi tersimpan. Silakan hubungi kafe sebelum mencoba lagi.");
   }
-  return newOrder;
+  return savedOrder as Order;
 }
 
 export async function updateOrderStatus(id: string, status: OrderStatus): Promise<Order | null> {
-  const db = loadDB();
-  const idx = db.orders.findIndex((o) => o.id === id);
-  if (idx === -1) return null;
-
-  db.orders[idx].status = status;
-  if (status === "completed") {
-    db.orders[idx].payment_status = "paid";
+  const validStatuses: OrderStatus[] = ["pending", "confirmed", "preparing", "ready", "completed", "cancelled"];
+  if (!validStatuses.includes(status)) {
+    throw new OrderStorageError("Status pesanan tidak valid.", 400);
   }
-  db.orders[idx].updated_at = new Date().toISOString();
-  saveDB(db);
-
-  if (isSupabaseConfigured && supabaseAdmin) {
-    try {
-      await supabaseAdmin.from("orders").update({ status, updated_at: new Date().toISOString() }).eq("id", id);
-    } catch (e) {
-      console.warn("Supabase updateOrderStatus error:", e);
-    }
+  const client = requireSupabaseOrderStore();
+  const { data, error } = await client.rpc("update_order_status", {
+    p_order_id: id,
+    p_status: status,
+  });
+  if (error) {
+    console.error("Supabase updateOrderStatus failed:", error.code);
+    throw new OrderStorageError("Status pesanan gagal diperbarui.");
   }
-  return db.orders[idx];
+  if (data === null) return null;
+  if (typeof data !== "object" || !Array.isArray(data.items)) {
+    throw new OrderStorageError("Status pesanan belum dapat diverifikasi.");
+  }
+  return data as Order;
 }
 
 // -------------------------------------------------------------
 // CUSTOMERS & TRANSACTIONS
 // -------------------------------------------------------------
 export async function getCustomers(): Promise<Customer[]> {
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from("customers")
+      .select("*")
+      .order("last_visit", { ascending: false });
+    if (error) {
+      console.error("Supabase getCustomers failed:", error.code);
+      throw new OrderStorageError("Gagal memuat data pelanggan.");
+    }
+    return (data ?? []) as Customer[];
+  }
+  if (process.env.NODE_ENV === "production") {
+    throw new OrderStorageError("Database pelanggan belum dikonfigurasi.");
+  }
   return loadDB().customers;
 }
 
 export async function getTransactions(): Promise<Transaction[]> {
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from("transactions")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error("Supabase getTransactions failed:", error.code);
+      throw new OrderStorageError("Gagal memuat data transaksi.");
+    }
+    return (data ?? []) as Transaction[];
+  }
+  if (process.env.NODE_ENV === "production") {
+    throw new OrderStorageError("Database transaksi belum dikonfigurasi.");
+  }
   return loadDB().transactions;
 }
 
@@ -636,14 +710,16 @@ export async function getTransactions(): Promise<Transaction[]> {
 // REPORTS & ANALYTICS
 // -------------------------------------------------------------
 export async function getReportsData() {
-  const db = loadDB();
-  const orders = db.orders;
-  const bookings = db.bookings;
+  const [orders, bookings, customers] = await Promise.all([
+    getOrders(),
+    getBookings(),
+    getCustomers(),
+  ]);
 
   const totalRevenue = orders.reduce((sum, o) => sum + (o.status !== "cancelled" ? o.total_amount : 0), 0);
   const totalOrders = orders.length;
   const totalBookings = bookings.length;
-  const totalCustomers = db.customers.length;
+  const totalCustomers = customers.length;
 
   // Best selling products calculation
   const productMap: Record<string, { name: string; count: number; revenue: number; image?: string }> = {};
