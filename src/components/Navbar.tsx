@@ -202,13 +202,7 @@ export default function Navbar({ cafeSettings }: NavbarProps) {
                   <Search className="w-4 h-4" />
                   <span>{t("nav_track_order")}</span>
                 </Link>
-                <Link
-                  href="/admin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-xs text-[#7E8680] hover:text-[#232724]"
-                >
-                  Admin Portal
-                </Link>
+                
               </div>
             </nav>
           </div>
